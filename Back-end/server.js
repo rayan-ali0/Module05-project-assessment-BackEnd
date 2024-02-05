@@ -45,3 +45,4 @@ app.post("/logout", logOut);
 app.post("/login", login);
 app.use('/product',productRoutes)
 app.use('/order',orderRoutes)
+app.use('/images',express.static('images'))
