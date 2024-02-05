@@ -5,8 +5,10 @@ import {verifyToken} from '../Middlwares/verifyToken.js'
 import {checkRole} from '../Middlwares/verifyRole.js'
 export const productRoutes= express.Router()
 
-productRoutes.post('/create', uploadImage.single("image"),productController.createProduct)
+productRoutes.post('/create',verifyToken,checkRole(['admin']), uploadImage.single("image"),productController.createProduct)
 productRoutes.get('/:id',productController.getProductById)
 productRoutes.get('/read/all',productController.getProducts)
 productRoutes.delete('/:id',productController.deleteProduct)
 productRoutes.put('/update',uploadImage.single("image"),productController.editProduct)
+productRoutes.get('/sorted/ByPrice/:type',productController.sortByPrice)
+// productRoutes.get('/sorted/By',productController.sortBy)

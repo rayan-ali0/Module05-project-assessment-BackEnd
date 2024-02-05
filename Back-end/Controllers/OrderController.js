@@ -3,7 +3,8 @@ import Product from '../Models/Product.js'
 
 export const orderController = {
     createOrder: async (req, res) => {
-        const { userId, userPhone, address,total,  productsOrdered } = req.body
+        const userId=req.user._id
+        const { userPhone, address,total,  productsOrdered } = req.body
         try {
             const newOrder = await Order.create({
                 userPhone,

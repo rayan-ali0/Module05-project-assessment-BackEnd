@@ -5,8 +5,8 @@ import {checkRole} from '../Middlwares/verifyRole.js'
 
 const orderRoutes = express.Router()
 
-orderRoutes.post('/create', orderController.createOrder)
-orderRoutes.get('/read',  orderController.getAllOrders)
+orderRoutes.post('/create',verifyToken, orderController.createOrder)
+orderRoutes.get('/readAll',  orderController.getAllOrders)
 orderRoutes.get('/read/:id',  orderController.getOrderById)
 orderRoutes.patch('/update/:id', orderController.updateOrder)
 orderRoutes.delete('/delete/:id', orderController.deleteOrder)

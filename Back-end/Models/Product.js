@@ -26,6 +26,12 @@ const Product = new Schema({
         type: String,
         required: true,
         unique:true
+    },
+    stock:{
+        type: Number,
+        min: 1,
+        required: true,
+        default:5
     }
 
 },

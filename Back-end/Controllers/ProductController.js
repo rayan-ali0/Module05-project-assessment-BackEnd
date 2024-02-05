@@ -9,10 +9,11 @@ export const productController = {
                 title,
                 description,
                 price,
+                stock
             } = req.body;
 
             const titleExist = await Product.find({ title: title })
-            if (titleExist.length>0) {
+            if (titleExist.length > 0) {
                 return res.status(400).json({ message: "Title already exist" })
 
             }
@@ -23,15 +24,17 @@ export const productController = {
             const newProduct = new Product({
                 title,
                 description,
-                image:req.file.path,
-                price
+                image: req.file.path,
+                price,
+                slug,
+                stock
             });
             const savedProduct = await newProduct.save();
 
-           return res.status(200).json(savedProduct);
+            return res.status(200).json(savedProduct);
         } catch (error) {
             console.error("Error creating product:", error);
-           return res.status(500).json( {message:error.message});
+            return res.status(500).json({ message: error.message });
         }
     }
 
@@ -41,26 +44,23 @@ export const productController = {
         try {
             const product = await Product.findById(id);
             if (!product) {
-                return  res.status(400).json({ message: "Product Not Found" })
+                return res.status(400).json({ message: "Product Not Found" })
             }
-           return res.status(200).json(product)
+            return res.status(200).json(product)
         }
         catch (error) {
-         return   res.status(404).json({ message: error.message })
+            return res.status(404).json({ message: error.message })
         }
     }
     ,
     getProducts: async (req, res) => {
         try {
-            const offset= req.offset || 0;
-            const limit = req.limit || 10
-            // const products = await Product.find().limit(limit).skip(offset)exec();
             const products = await Product.find();
             if (products.length === 0) {
                 return res.status(404).json("Products Not Found");
             }
 
-         return   res.status(200).json(products);
+            return res.status(200).json(products);
         } catch (error) {
             return res.status(500).json(error.message);
         }
@@ -73,19 +73,19 @@ export const productController = {
         try {
             const deletedProduct = await Product.findByIdAndDelete(id);
             if (!deletedProduct) {
-             return   res.status(404).json({ error: 'Product not found' })
+                return res.status(404).json({ error: 'Product not found' })
             }
             fs.unlinkSync(deletedProduct.image)
-           return res.status(200).json({ message: "Product Deleted" })
+            return res.status(200).json({ message: "Product Deleted" })
         }
         catch (error) {
-          return  res.status(404).json(error.message)
+            return res.status(404).json(error.message)
         }
     }
     ,
     editProduct: async (req, res) => {
-        const id=req.body._id
-        const updatedFields = {...req.body }
+        const id = req.body._id
+        const updatedFields = { ...req.body }
         delete updatedFields._id;
 
         const editedProduct = await Product.findById(id)
@@ -94,7 +94,7 @@ export const productController = {
         }
 
         const titleExist = await Product.findOne({ title: req.body.title })
-        if (titleExist && titleExist._id.toString()!==id) {
+        if (titleExist && titleExist._id.toString() !== id) {
             return res.status(400).json({ message: "Title already exist" })
         }
         if (req.body.title) {
@@ -108,17 +108,53 @@ export const productController = {
                 if (updated && req.file) {
                     fs.unlinkSync(oldImage)
                 }
-               return res.status(200).json(updated)
+                return res.status(200).json(updated)
             }
             catch (error) {
                 return res.status(500).json({ message: error.message })
             }
         }
-        if(!editedProduct) {
-          return  res.status(500).json({ message: "Product Not Found" })
+        if (!editedProduct) {
+            return res.status(500).json({ message: "Product Not Found" })
 
         }
     }
+    , sortByPrice: async (req, res) => {
+        const { type } = req.params
+        if (type === "low") {
+
+            const productSorted = await Product.aggregate().sort({ "price": 1 })
+            return res.status(200).json(productSorted)
+        }
+        else {
+
+            const productSorted = await Product.aggregate().sort({ "price": -1 })
+            return res.status(200).json(productSorted)
+        }
+    }
+    // sortBy: async (req, res) => {
+    //     const { type, sortByWhat } = req.params
+    //     if (type === "low") {
+
+    //         const productSorted = await Product.aggregate().sort({ [sortByWhat]: 1 })
+    //         return res.status(200).json(productSorted)
+    //     }
+    //     else {
+    //         const productSorted = await Product.aggregate().sort({ [sortByWhat]: -1 })
+    //         return res.status(200).json(productSorted)
+    //     }
+    
+    // }
+    // ,
+
+    // search: async (req, res) => {
+    //     const { searchTerm } = req.params
+
+    //         const productSorted = await Product.aggregate().sort({ [sortByWhat]: 1 })
+    //         return res.status(200).json(productSorted)
+    
+    // }
+    
 
 
 
